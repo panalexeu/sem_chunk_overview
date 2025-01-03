@@ -2,17 +2,18 @@ import re
 from typing import List
 
 from chunking_evaluation import BaseChunker, GeneralEvaluation
+from chunking_evaluation.chunking import KamradtModifiedChunker
 from chromadb.utils import embedding_functions
 from sentence_transformers import SentenceTransformer
 from rich import print
 
 
 class WindowSemChunker(BaseChunker):
-    thresh = 0.95
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    thresh = 0.78
+    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
 
     def split_text(self, text: str) -> List[str]:
-        split_text = re.split(r'(?<=[.!?;:])\s+', text)
+        split_text = re.split(r'(?<=[.!?])\s+', text)
 
         prev = ''
         init = text[0]
@@ -26,6 +27,9 @@ class WindowSemChunker(BaseChunker):
             )
 
             if dist < self.thresh:
+                # print(f'prev: {prev}\nbreakpoint sentence: {sentence}\ndist: {dist}\nchunks count: {len(chunks) + 1}')
+                # print('=' * 25)
+
                 chunks.append(prev)
                 prev = sentence
                 init = sentence
@@ -37,13 +41,12 @@ class WindowSemChunker(BaseChunker):
 
         return chunks
 
-
-chunker = WindowSemChunker()
-evaluation = GeneralEvaluation()
-
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"
 )
+
+chunker = KamradtModifiedChunker(embedding_function=ef)
+evaluation = GeneralEvaluation()
 
 
 if __name__ == '__main__':
