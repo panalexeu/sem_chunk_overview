@@ -1,51 +1,26 @@
-import re
-from typing import List
+import time
 
-from chunking_evaluation import BaseChunker, GeneralEvaluation
+from chunking_evaluation import DatasetEvaluation, Dataset
 from chromadb.utils import embedding_functions
-from sentence_transformers import SentenceTransformer
 from rich import print
 
-
-class WindowSemChunker(BaseChunker):
-    thresh = 0.95
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
-    def split_text(self, text: str) -> List[str]:
-        split_text = re.split(r'(?<=[.!?;:])\s+', text)
-
-        prev = ''
-        init = text[0]
-        chunks = []
-
-        for sentence in split_text:
-            res = prev + ' ' + sentence
-            dist = self.model.similarity(
-                self.model.encode(init),
-                self.model.encode(res)
-            )
-
-            if dist < self.thresh:
-                chunks.append(prev)
-                prev = sentence
-                init = sentence
-            else:
-                prev = res
-
-        if prev not in chunks:
-            chunks.append(prev)
-
-        return chunks
-
+from window_sem_chunker import WindowSemChunker
 
 chunker = WindowSemChunker()
-evaluation = GeneralEvaluation()
+evaluation = DatasetEvaluation(
+    datasets=[
+        Dataset.STATE_OF_THE_UNION
+    ]
+)
 
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"
 )
 
-
 if __name__ == '__main__':
+    start = time.time()
     results = evaluation.run(chunker, ef)
+    end = time.time()
+
     print(results)
+    print(f'TIME: {end - start}')
