@@ -11,11 +11,8 @@ ef = embedding_functions.SentenceTransformerEmbeddingFunction(
 chunker = FixedTokenChunker()
 eval = DatasetEvaluation(
     datasets=[
-        Dataset.PUBMED,
         Dataset.WIKITEXTS,
-        Dataset.CHATLOGS,
         Dataset.FINANCE,
-        Dataset.STATE_OF_THE_UNION,
     ]
 )
 

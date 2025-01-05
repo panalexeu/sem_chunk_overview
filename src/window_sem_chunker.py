@@ -10,7 +10,7 @@ class WindowSemChunker(BaseChunker):
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
     def split_text(self, text: str) -> List[str]:
-        split_text = re.split(r'(?<=[.!?;:])\s+', text)
+        split_text = re.split(r'(?<=[.!?])\s+', text)
 
         prev = ''
         init = text[0]
@@ -24,6 +24,9 @@ class WindowSemChunker(BaseChunker):
             )
 
             if dist < self.thresh:
+                print(prev)
+                print('=' * 50)
+
                 chunks.append(prev)
                 prev = sentence
                 init = sentence

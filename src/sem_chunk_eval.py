@@ -9,7 +9,8 @@ from window_sem_chunker import WindowSemChunker
 chunker = WindowSemChunker()
 evaluation = DatasetEvaluation(
     datasets=[
-        Dataset.STATE_OF_THE_UNION
+        Dataset.CHATLOGS,
+        Dataset.PUBMED
     ]
 )
 
