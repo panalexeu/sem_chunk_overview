@@ -9,7 +9,11 @@ from window_sem_chunker import WindowSemChunker, TokenWindowSemChunker
 
 evaluation = DatasetEvaluation(
     datasets=[
-        Dataset.STATE_OF_THE_UNION
+        Dataset.STATE_OF_THE_UNION,
+        Dataset.PUBMED,
+        Dataset.CHATLOGS,
+        Dataset.FINANCE,
+        Dataset.WIKITEXTS
     ]
 )
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(

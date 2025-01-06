@@ -1,4 +1,5 @@
 import re
+import time
 from typing import List
 from overrides import override
 
@@ -19,7 +20,13 @@ class WindowSemChunker(BaseChunker):
         self.model = model
 
     def _create_chunks(self, text: str) -> list[str]:
-        return re.split(r'(?<=[.!?])\s+', text)
+        chunks = re.split(r'(?<=[.!?])\s+', text)
+        # clearing chunks
+        clear_chunks = []
+        for chunk in chunks:
+            clear_chunks.append(' '.join(chunk.split()))
+
+        return clear_chunks
 
     def split_text(self, text: str) -> List[str]:
         split_text = self._create_chunks(text)
@@ -66,14 +73,20 @@ class TokenWindowSemChunker(WindowSemChunker):
 
     @override
     def _create_chunks(self, text: str) -> list[str]:
-        enc = tiktoken.get_encoding('cl100k_base')
-        tokens = enc.encode(text)
+        # split text based on \n's
+        split_text = re.split(r'\n{1,2}', text)
+
+        # if the splitted \n's chunks are bigger than chunk_size => split them on chunks of 64 tokens size
         chunks = []
-        for i in range(0, len(tokens), self.chunk_size):
-            chunk = tokens[i:i + self.chunk_size]
-            print(chunk)
-            print('-' * 50)
-            chunks.append(enc.decode(chunk))
+        enc = tiktoken.get_encoding('cl100k_base')
+        for chunk in split_text:
+            tokens = enc.encode(chunk)
+            if len(tokens) > self.chunk_size:
+                for i in range(0, len(tokens), self.chunk_size):
+                    chunk = enc.decode(tokens[i:i + self.chunk_size])
+                    chunks.append(chunk)
+            else:
+                chunks.append(chunk)
 
         return chunks
 
